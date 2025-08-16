@@ -8,6 +8,7 @@ import time
 
 import pandas
 import requests
+from requests.exceptions import ConnectionError
 
 
 class EkuboLiquidity:
@@ -108,32 +109,35 @@ class EkuboLiquidity:
         attempt = 0
 
         while attempt < max_retries:
-            response = requests.get(self.URL, params=params)
+            try:
+                response = requests.get(self.URL, params=params)
+            except ConnectionError as e:
+                logging.warning("Unable to reach ekubo api url: %s", e)
+                return None
 
-            if response.ok:
-                liquidity = response.json()
-                data = {
-                    "type": "bids" if bids else "asks",
-                }
+            if not response.ok:
+                logging.warning(
+                    f"API request failed (attempt {attempt + 1}/{max_retries}), retrying in {retry_delay} seconds..."
+                )
+                time.sleep(retry_delay)
+                attempt += 1
+                continue
 
-                if data["type"] in liquidity:
-                    try:
-                        data["prices"], data["quantities"] = zip(
-                            *liquidity[data["type"]]
-                        )
-                        return {
-                            "type": data["type"],
-                            "prices": data["prices"],
-                            "quantities": data["quantities"],
-                        }
-                    except ValueError:
-                        logging.warning("Invalid response format, retrying...")
+            liquidity = response.json()
+            data = {
+                "type": "bids" if bids else "asks",
+            }
 
-            logging.warning(
-                f"API request failed (attempt {attempt + 1}/{max_retries}), retrying in {retry_delay} seconds..."
-            )
-            time.sleep(retry_delay)
-            attempt += 1
+            if data["type"] in liquidity:
+                try:
+                    data["prices"], data["quantities"] = zip(*liquidity[data["type"]])
+                    return {
+                        "type": data["type"],
+                        "prices": data["prices"],
+                        "quantities": data["quantities"],
+                    }
+                except ValueError:
+                    logging.warning("Invalid response format, retrying...")
 
         logging.error("Max retries reached. Could not fetch liquidity.")
         return None
