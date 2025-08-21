@@ -49,6 +49,28 @@ class DataConnector:
         WHERE protocol_id = 'zkLend' AND block = (SELECT max_block FROM max_block);
     """
 
+    NOSTRA_ALPHA_SQL_QUERY = """
+        SELECT
+            ls.block,
+            ls.user,
+            ls.collateral,
+            ls.debt            
+        FROM
+            loan_state AS ls       
+        WHERE
+            ls.protocol_id = 'Nostra_alpha';
+    """
+    NOSTRA_ALPHA_INTEREST_RATE_SQL_QUERY = """
+        WITH max_block AS (
+            SELECT MAX(block) AS max_block
+            FROM interest_rate
+            WHERE protocol_id = 'Nostra_alpha'
+        )
+        SELECT collateral, debt, block 
+        FROM interest_rate
+        WHERE protocol_id = 'Nostra_alpha' AND block = (SELECT max_block FROM max_block);
+    """
+
     VESU_POSITIONS_SQL_QUERY = """
         SELECT
             vp.user,

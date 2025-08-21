@@ -57,12 +57,11 @@ class UniswapV2OrderBook(OrderBookBase):
     def get_or_create_eventloop(self) -> asyncio.AbstractEventLoop:
         try:
             return asyncio.get_event_loop()
-        except RuntimeError as ex:           
+        except RuntimeError as ex:
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
             return asyncio.get_event_loop()
-           
-        
+
     def fetch_price_and_liquidity(self) -> None:
         loop = self.get_or_create_eventloop()
         if loop.is_running():

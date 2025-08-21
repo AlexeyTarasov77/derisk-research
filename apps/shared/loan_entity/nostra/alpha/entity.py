@@ -3,7 +3,9 @@ Event processing for Nostra Alpha protocol, including loan and collateral manage
 """
 
 import decimal
-from shared.loan_entity.nostra.alpha.settings import NOSTRA_ALPHA_SPECIFIC_TOKEN_SETTINGS
+from shared.loan_entity.nostra.alpha.settings import (
+    NOSTRA_ALPHA_SPECIFIC_TOKEN_SETTINGS,
+)
 from shared.custom_types import InterestRateModels, Portfolio, Prices, TokenParameters
 from shared.loan_entity import LoanEntity
 

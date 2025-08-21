@@ -28,9 +28,11 @@ Key Features:
 React client app. Uses API if the  [`dashboard_app`](./apps/dashboard_app/README.md)
 
 
-### Outdated and about to be removed
-- [`web_app`](./apps/web_app/README.md) - Main web application interface
-- [`legacy_app`](./apps/legacy_app/README.md) - Legacy application functionality
+## Legacy Apps
+Legacy apps contain code that has been migrated to the current apps, along with additional code. Explore them in case of a stack issue:
+- [web_app](https://github.com/CarmineOptions/derisk-research/tree/5a4b9dc752399480f41884a286ab28b2b9804468/apps/web_app)
+- [legacy_app](https://github.com/CarmineOptions/derisk-research/tree/5a4b9dc752399480f41884a286ab28b2b9804468/apps/legacy_app)
+- [sdk](https://github.com/CarmineOptions/derisk-research/tree/5a4b9dc752399480f41884a286ab28b2b9804468/apps/sdk)
 
 
 

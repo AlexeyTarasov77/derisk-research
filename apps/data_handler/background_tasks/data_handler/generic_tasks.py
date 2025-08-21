@@ -34,12 +34,12 @@ logger = logging.getLogger(__name__)
 
 
 @shared_task(name="run_loan_states_computation_for_zklend")
-def run_loan_states_computation_for_zklend():        
+def run_loan_states_computation_for_zklend():
     start = monotonic()
-    logging.basicConfig(level=logging.INFO) 
+    logging.basicConfig(level=logging.INFO)
     logging.info("Starting zkLend loan state computation")
-    computation = ZkLendLoanStateComputation()   
-    computation.run()   
+    computation = ZkLendLoanStateComputation()
+    computation.run()
 
     logging.info(
         "Finished zkLend loan state computation, Time taken: %s seconds",

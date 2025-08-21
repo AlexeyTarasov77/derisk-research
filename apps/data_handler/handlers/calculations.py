@@ -8,6 +8,7 @@ from shared.amms import SwapAmm
 
 logger = logging.getLogger(__name__)
 
+
 @shared_task(name="fetch_balance_for_pools")
 def fetch_balance_for_pools():
     """

@@ -8,6 +8,7 @@ from dashboard_app.app.telegram_app.telegram.handlers.utils import kb
 
 create_notification_router = Router()
 
+
 class NotificationFormStates(StatesGroup):
     """States for the notification form process."""
 

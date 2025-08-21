@@ -5,7 +5,11 @@ from aiogram.types import BotCommand, BotCommandScopeDefault
 from dashboard_app.app.telegram_app.telegram.crud import get_async_sessionmaker
 from dashboard_app.app.telegram_app.telegram.middleware import DatabaseMiddleware
 
-from dashboard_app.app.telegram_app.telegram.config import TELEGRAM_TOKEN, X_TELEGRAM_BOT_API_SECRET_TOKEN, BASE_URL
+from dashboard_app.app.telegram_app.telegram.config import (
+    TELEGRAM_TOKEN,
+    X_TELEGRAM_BOT_API_SECRET_TOKEN,
+    BASE_URL,
+)
 from dashboard_app.app.telegram_app.telegram.handlers import index_router
 
 bot = Bot(token=TELEGRAM_TOKEN)
@@ -13,7 +17,7 @@ dp = Dispatcher()
 dp.include_router(index_router)
 
 
-async def on_startup(bot: Bot) -> None:  
+async def on_startup(bot: Bot) -> None:
     # TODO fix url if needed on prod.
     await bot.set_webhook(
         f"{BASE_URL}/api/telegram/webhook", secret_token=X_TELEGRAM_BOT_API_SECRET_TOKEN

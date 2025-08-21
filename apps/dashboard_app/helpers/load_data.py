@@ -8,6 +8,8 @@ import math
 from collections import defaultdict
 from time import monotonic
 
+from shared.protocol_ids import ProtocolIDs
+from shared.state.nostra.alpha import NostraAlphaState
 from shared.state import ZkLendState
 from shared.constants import TOKEN_SETTINGS
 
@@ -39,6 +41,7 @@ class DashboardDataHandler:
         self.underlying_addresses_to_decimals = defaultdict(dict)
         self.zklend_state = None
         self.prices: Prices | None = None
+        self.nostra_alpha_state = None
         self.states = []
 
     @classmethod
@@ -48,10 +51,11 @@ class DashboardDataHandler:
         """
         instance = cls()
         instance.zklend_state = await instance._init_zklend_state()
+        instance.nostra_alpha_state = await instance._init_nostra_alpha_state()
         # TODO add also nostra states
         instance.states = [
             instance.zklend_state,
-            # nostra_alpha_state,
+            instance.nostra_alpha_state,
             # nostra_mainnet_state,
         ]
         return instance
@@ -67,6 +71,85 @@ class DashboardDataHandler:
         await self._fetch_and_process_zklend_data(zklend_state)
         await self._set_zklend_interest_rates(zklend_state)
         return zklend_state
+
+    async def _init_nostra_alpha_state(self) -> NostraAlphaState:
+        """
+        Initialize NostrAlpha state.
+        Fetch data from the database and initialize the state.
+        :return: Initialized NostrAlpha state.
+        """
+        logger.info("Initializing NostrAlpha state.")
+        nostra_state = NostraAlphaState(can_collect_token_parameters=False)
+        await nostra_state.collect_token_parameters()
+        await self._fetch_and_process_Nostra_alpha_data(nostra_state)
+        await self._set_nostra_alpha_interest_rates(nostra_state)
+        return nostra_state
+
+    async def _fetch_and_process_Nostra_alpha_data(self, nostra_state):
+        PROTOCOL_Nostra = ProtocolIDs.NOSTRA_ALPHA.value
+        BATCH_SIZE = 1000
+        start = monotonic()
+
+        try:
+            first_block = await self.data_connector.fetch_protocol_first_block_number(
+                PROTOCOL_Nostra
+            )
+            last_block = await self.data_connector.fetch_protocol_last_block_number(
+                PROTOCOL_Nostra
+            )
+
+            current_block = first_block
+            while current_block <= last_block:
+                end_block = min(current_block + BATCH_SIZE - 1, last_block)
+                batch = await self.data_connector.fetch_data(
+                    self.data_connector.NOSTRA_ALPHA_SQL_QUERY,
+                    protocol=PROTOCOL_Nostra,
+                    batch_size=BATCH_SIZE,
+                    start_block=current_block,
+                    end_block=end_block,
+                )
+
+                if not batch.empty:
+                    nostra_data_dict = batch.to_dict(orient="records")
+                    for loan_state in nostra_data_dict:
+                        user_loan_state = nostra_state.loan_entities[loan_state["user"]]
+                        # user_loan_state.collateral_enabled.values = loan_state[
+                        #     "collateral_enabled"
+                        # ]
+                        user_loan_state.collateral.values = loan_state["collateral"]
+                        user_loan_state.debt.values = loan_state["debt"]
+                    logger.info(
+                        f"Processed {len(batch)} records for blocks {current_block} to {end_block}"
+                    )
+                current_block = end_block + 1
+
+            logger.info(f"Processed total of {last_block - first_block + 1} blocks")
+
+        except Exception as e:
+            logger.error(f"Error processing data data: {e}")
+            raise
+
+        nostra_state.last_block_number = last_block
+        logger.info("Initialized data state in %.2fs", monotonic() - start)
+
+    async def _set_nostra_alpha_interest_rates(self, nostra_state):
+        nostra_interest_rate_data = await self.data_connector.fetch_data(
+            self.data_connector.NOSTRA_ALPHA_INTEREST_RATE_SQL_QUERY
+        )
+
+        if not nostra_interest_rate_data["collateral"].empty:
+            nostra_state.interest_rate_models.collateral = nostra_interest_rate_data[
+                "collateral"
+            ].iloc[0]
+        else:
+            nostra_state.interest_rate_models.collateral = None
+
+        if not nostra_interest_rate_data["collateral"].empty:
+            nostra_state.interest_rate_models.debt = nostra_interest_rate_data[
+                "debt"
+            ].iloc[0]
+        else:
+            nostra_state.interest_rate_models.debt = None
 
     async def _fetch_and_process_zklend_data(self, zklend_state):
         PROTOCOL_ZKLEND = "zkLend"

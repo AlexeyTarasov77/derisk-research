@@ -5,6 +5,7 @@ from typing import Annotated
 import os
 import logging
 from dotenv import load_dotenv
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -14,6 +15,7 @@ load_dotenv()
 X_TELEGRAM_BOT_API_SECRET_TOKEN = os.getenv("X_TELEGRAM_BOT_API_SECRET_TOKEN")
 
 router = APIRouter()
+
 
 @router.post("/telegram/webhook")
 async def bot_webhook(
@@ -26,4 +28,3 @@ async def bot_webhook(
         return {"status": "error", "message": "Wrong secret token !"}
     telegram_update = types.Update(**update)
     await dp.feed_webhook_update(bot=bot, update=telegram_update)
-

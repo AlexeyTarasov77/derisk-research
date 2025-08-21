@@ -211,42 +211,38 @@ def get_bar_chart_figures(
         x.symbol: x.address for x in TOKEN_SETTINGS.values()
     }
     prices = get_prices(token_decimals=underlying_addresses_to_decimals)
-    bar_chart_supply_stats = pd.DataFrame(index=[0])
-    bar_chart_collateral_stats = pd.DataFrame(index=[0])
-    bar_chart_debt_stats = pd.DataFrame(index=[0])
-    for column in supply_stats.columns:
-        if "protocol" in column.lower():
-            bar_chart_supply_stats[column] = supply_stats[column][0]
-            bar_chart_collateral_stats[column] = collateral_stats[column.capitalize()][
-                0
-            ]
-            bar_chart_debt_stats[column] = debt_stats[column][0]
-            continue
-        elif "total" in column.lower():
-            continue
-        underlying_symbol = column.split(" ")[0]
-        underlying_address = underlying_symbols_to_addresses[
-            SUPPLY_STATS_TOKEN_SYMBOLS_MAPPING[underlying_symbol]
-        ]
-        bar_chart_supply_stats[underlying_symbol] = supply_stats[column].loc[
-            0
-        ] * Decimal(prices[underlying_address])
-        # handling the specific case with WBTC token
-        if underlying_symbol == "wbtc":
-            bar_chart_collateral_stats[underlying_symbol] = (
-                collateral_stats["wBTC collateral"].loc[0] * prices[underlying_address]
+    protocols = supply_stats["protocol"].astype(str).unique()
+    tokens = [k.lower() for k in SUPPLY_STATS_TOKEN_SYMBOLS_MAPPING.keys()]
+    bar_chart_supply_stats = pd.DataFrame(0, index=tokens, columns=protocols)
+    bar_chart_collateral_stats = pd.DataFrame(0, index=tokens, columns=protocols)
+    bar_chart_debt_stats = pd.DataFrame(0, index=tokens, columns=protocols)
+
+    for i in supply_stats.index:
+        protocol = str(supply_stats.at[i, "protocol"])
+        for column in supply_stats.columns:
+            if "protocol" in column.lower() or "total" in column.lower():
+                continue
+            underlying_symbol = column.split(" ")[0].lower()
+            key = SUPPLY_STATS_TOKEN_SYMBOLS_MAPPING[underlying_symbol]
+            underlying_address = underlying_symbols_to_addresses[key]
+            price = Decimal(str(prices[underlying_address]))
+            bar_chart_supply_stats.at[underlying_symbol, protocol] = (
+                Decimal(str(supply_stats.at[i, column])) * price
             )
-        else:
-            bar_chart_collateral_stats[underlying_symbol] = (
-                collateral_stats[
+            if underlying_symbol == "wbtc":
+                coll_col = "wBTC collateral"
+            else:
+                coll_col = (
                     SUPPLY_STATS_TOKEN_SYMBOLS_MAPPING[underlying_symbol]
                     + " collateral"
-                ].loc[0]
-                * prices[underlying_address]
+                )
+            bar_chart_collateral_stats.at[underlying_symbol, protocol] = (
+                Decimal(str(collateral_stats.at[i, coll_col])) * price
             )
-        bar_chart_debt_stats[underlying_symbol] = (
-            debt_stats[underlying_symbol + " debt"].loc[0] * prices[underlying_address]
-        )
+            debt_col = underlying_symbol + " debt"
+            bar_chart_debt_stats.at[underlying_symbol, protocol] = (
+                Decimal(str(debt_stats.at[i, debt_col])) * price
+            )
 
     bar_chart_supply_stats = bar_chart_supply_stats.T
     bar_chart_collateral_stats = bar_chart_collateral_stats.T
@@ -257,15 +253,15 @@ def get_bar_chart_figures(
             plotly.graph_objs.Bar(
                 name="zkLend",
                 x=bar_chart_supply_stats.index,
-                y=bar_chart_supply_stats[0],
+                y=bar_chart_supply_stats.iloc[0],
                 marker=plotly.graph_objs.bar.Marker(color="#fff7bc"),
             ),
-            # plotly.graph_objs.Bar(
-            #     name="Nostra Alpha",
-            #     x=bar_chart_supply_stats.index,
-            #     y=bar_chart_supply_stats["Nostra Alpha"],
-            #     marker=plotly.graph_objs.bar.Marker(color="#fec44f"),
-            # ),
+            plotly.graph_objs.Bar(
+                name="Nostra Alpha",
+                x=bar_chart_supply_stats.index,
+                y=bar_chart_supply_stats.iloc[1],
+                marker=plotly.graph_objs.bar.Marker(color="#fec44f"),
+            ),
             # plotly.graph_objs.Bar(
             #     name="Nostra Mainnet",
             #     x=bar_chart_supply_stats.index,
@@ -281,15 +277,15 @@ def get_bar_chart_figures(
             plotly.graph_objs.Bar(
                 name="zkLend",
                 x=bar_chart_collateral_stats.index,
-                y=bar_chart_collateral_stats[0],
+                y=bar_chart_collateral_stats.iloc[0],
                 marker=plotly.graph_objs.bar.Marker(color="#fff7bc"),
             ),
-            # plotly.graph_objs.Bar(
-            #     name="Nostra Alpha",
-            #     x=bar_chart_collateral_stats.index,
-            #     y=bar_chart_collateral_stats["Nostra Alpha"],
-            #     marker=plotly.graph_objs.bar.Marker(color="#fec44f"),
-            # ),
+            plotly.graph_objs.Bar(
+                name="Nostra Alpha",
+                x=bar_chart_collateral_stats.index,
+                y=bar_chart_collateral_stats.iloc[1],
+                marker=plotly.graph_objs.bar.Marker(color="#fec44f"),
+            ),
             # plotly.graph_objs.Bar(
             #     name="Nostra Mainnet",
             #     x=bar_chart_collateral_stats.index,
@@ -305,15 +301,15 @@ def get_bar_chart_figures(
             plotly.graph_objs.Bar(
                 name="zkLend",
                 x=bar_chart_debt_stats.index,
-                y=bar_chart_debt_stats[0],
+                y=bar_chart_debt_stats.iloc[0],
                 marker=plotly.graph_objs.bar.Marker(color="#fff7bc"),
             ),
-            # plotly.graph_objs.Bar(
-            #     name="Nostra Alpha",
-            #     x=bar_chart_debt_stats.index,
-            #     y=bar_chart_debt_stats["Nostra Alpha"],
-            #     marker=plotly.graph_objs.bar.Marker(color="#fec44f"),
-            # ),
+            plotly.graph_objs.Bar(
+                name="Nostra Alpha",
+                x=bar_chart_debt_stats.index,
+                y=bar_chart_debt_stats.iloc[1],
+                marker=plotly.graph_objs.bar.Marker(color="#fec44f"),
+            ),
             # plotly.graph_objs.Bar(
             #     name="Nostra Mainnet",
             #     x=bar_chart_debt_stats.index,

@@ -1,4 +1,5 @@
 import pytest
+from shared.protocol_ids import ProtocolIDs
 
 pytest.importorskip("shared")
 from shared.state import State
@@ -25,7 +26,10 @@ def test_state_without_protocol_name():
         _ = mock_state.get_protocol_name
 
 
-@pytest.mark.parametrize("protocol_name", ["zkLend", "Nostra Alpha", "Nostra Mainnet"])
+@pytest.mark.parametrize(
+    "protocol_name",
+    ["zkLend", ProtocolIDs.NOSTRA_ALPHA.value, ProtocolIDs.NOSTRA_MAINNET.value],
+)
 def test_protocol_names(protocol_name):
     """Test that protocol name is correctly returned"""
     mock_state = MockState()

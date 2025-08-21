@@ -65,6 +65,7 @@ class NostraAlphaState(State):
         self,
         loan_entity_class: NostraAlphaLoanEntity = NostraAlphaLoanEntity,
         verbose_user: Optional[str] = None,
+        can_collect_token_parameters=True,
     ) -> None:
         super().__init__(
             loan_entity_class=loan_entity_class,
@@ -76,7 +77,8 @@ class NostraAlphaState(State):
             str, str
         ] = {}
 
-        asyncio.run(self.collect_token_parameters())
+        if can_collect_token_parameters:
+            asyncio.run(self.collect_token_parameters())
 
     @staticmethod
     def _infer_token_type(token_symbol: str) -> tuple[str, bool]:

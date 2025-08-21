@@ -110,7 +110,9 @@ class DBConnectorAsync:
         async with self.session() as db:
             return await db.get(model, obj_id)
 
-    async def get_objects(self, model: Type[ModelType] = None, **kwargs) -> list[ModelType]:
+    async def get_objects(
+        self, model: Type[ModelType] = None, **kwargs
+    ) -> list[ModelType]:
         """
         Retrieves a list of objects from the database.
 
@@ -140,10 +142,14 @@ class DBConnectorAsync:
             Optional[Base] - Object instance or None if not found
         """
         async with self.session() as db:
-            result = await db.execute(select(model).where(getattr(model, field) == value))
+            result = await db.execute(
+                select(model).where(getattr(model, field) == value)
+            )
             return result.scalar_one_or_none()
 
-    async def delete_object_by_id(self, model: Type[ModelType], obj_id: uuid.UUID) -> None:
+    async def delete_object_by_id(
+        self, model: Type[ModelType], obj_id: uuid.UUID
+    ) -> None:
         """
         Deletes an object by its ID from the database.
         Uses Idempotent Delete approach.

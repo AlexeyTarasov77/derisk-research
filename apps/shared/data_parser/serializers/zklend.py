@@ -47,7 +47,9 @@ class AccumulatorsSyncEventData(BaseModel):
         try:
             return Decimal(int(value, 16))
         except ValueError:
-            raise ValueError(f"{info.field_name} field is not a valid hexadecimal number")
+            raise ValueError(
+                f"{info.field_name} field is not a valid hexadecimal number"
+            )
 
 
 class LiquidationEventData(BaseModel):
@@ -101,7 +103,9 @@ class LiquidationEventData(BaseModel):
         try:
             return Decimal(int(value, 16))
         except ValueError:
-            raise ValueError(f"{info.field_name} field is not a valid hexadecimal number")
+            raise ValueError(
+                f"{info.field_name} field is not a valid hexadecimal number"
+            )
 
 
 class WithdrawalEventData(BaseModel):
@@ -154,7 +158,9 @@ class WithdrawalEventData(BaseModel):
         try:
             return Decimal(int(value, 16))
         except ValueError:
-            raise ValueError(f"{info.field_name} field is not a valid hexadecimal number")
+            raise ValueError(
+                f"{info.field_name} field is not a valid hexadecimal number"
+            )
 
 
 class BorrowingEventData(BaseModel):
@@ -203,7 +209,9 @@ class BorrowingEventData(BaseModel):
         try:
             return Decimal(int(value, 16))
         except ValueError:
-            raise ValueError(f"{info.field_name} field is not a valid hexadecimal number")
+            raise ValueError(
+                f"{info.field_name} field is not a valid hexadecimal number"
+            )
 
 
 class RepaymentEventData(BaseModel):
@@ -253,7 +261,9 @@ class RepaymentEventData(BaseModel):
         try:
             return Decimal(int(value, 16))
         except ValueError:
-            raise ValueError(f"{info.field_name} field is not a valid hexadecimal number")
+            raise ValueError(
+                f"{info.field_name} field is not a valid hexadecimal number"
+            )
 
 
 class DepositEventData(BaseModel):
@@ -299,7 +309,9 @@ class DepositEventData(BaseModel):
         try:
             return Decimal(int(value, 16))
         except ValueError:
-            raise ValueError(f"{info.field_name} field is not a valid hexadecimal number")
+            raise ValueError(
+                f"{info.field_name} field is not a valid hexadecimal number"
+            )
 
 
 class CollateralEnabledDisabledEventData(BaseModel):

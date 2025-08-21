@@ -7,6 +7,7 @@ from collections import defaultdict
 from decimal import Decimal
 import math
 
+from shared.protocol_ids import ProtocolIDs
 import numpy as np
 import pandas as pd
 from shared import blockchain_call
@@ -164,7 +165,10 @@ def get_collateral_stats(
                         underlying_symbol=token,
                     )
                 ]
-            elif protocol in {"Nostra Alpha", "Nostra Mainnet"}:
+            elif protocol in {
+                ProtocolIDs.NOSTRA_ALPHA.value,
+                ProtocolIDs.NOSTRA_MAINNET.value,
+            }:
                 token_addresses = get_addresses(
                     token_parameters=state.token_parameters.collateral,
                     underlying_symbol=token,
@@ -237,7 +241,10 @@ def get_debt_stats(
                         underlying_symbol=token,
                     )
                 ]
-            elif protocol in {"Nostra Alpha", "Nostra Mainnet"}:
+            elif protocol in {
+                ProtocolIDs.NOSTRA_ALPHA.value,
+                ProtocolIDs.NOSTRA_MAINNET.value,
+            }:
                 token_addresses = get_addresses(
                     token_parameters=state.token_parameters.debt,
                     underlying_symbol=token,

@@ -25,9 +25,12 @@ def upgrade() -> None:
     inspector = inspect(conn)
 
     # Check if the column exists
-    if "version" not in [column['name'] for column in inspector.get_columns("hashtack_collateral_debt")]:
+    if "version" not in [
+        column["name"] for column in inspector.get_columns("hashtack_collateral_debt")
+    ]:
         op.add_column(
-            "hashtack_collateral_debt", sa.Column("version", sa.Integer(), nullable=True)
+            "hashtack_collateral_debt",
+            sa.Column("version", sa.Integer(), nullable=True),
         )
 
     # ### Step 2: Set default value (0) for existing records ###

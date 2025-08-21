@@ -1,3 +1,4 @@
+import copy
 from shared.state import State
 import decimal
 import logging
@@ -320,7 +321,7 @@ class ZkLendState(State):
     ) -> float:
         changed_prices = copy.deepcopy(prices)
         changed_prices[collateral_token_underlying_address] = collateral_token_price
-        max_liquidated_amount = Decimal("0")
+        max_liquidated_amount = decimal.Decimal("0")
         for loan_entity in self.loan_entities.values():
             # Filter out entities where the collateral token of interest is deposited as collateral.
             collateral_token_underlying_addresses = {
@@ -370,7 +371,7 @@ class ZkLendState(State):
             # We assume that the liquidator receives the
             # collateral token of interest even though it might not be the most
             # optimal choice for the liquidator.
-            max_liquidated_amount += Decimal(
+            max_liquidated_amount += decimal.Decimal(
                 str(
                     loan_entity.compute_debt_to_be_liquidated(
                         debt_token_underlying_address=debt_token_underlying_address,

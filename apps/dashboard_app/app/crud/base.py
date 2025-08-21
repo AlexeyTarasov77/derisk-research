@@ -52,10 +52,12 @@ class DashboardDBConnectorAsync(DBConnectorAsync):
             float | None: User debt if found, otherwise None.
         """
         async with self.session() as db:
-            sql = text("""
+            sql = text(
+                """
                 SELECT debt FROM loan_state
                 WHERE protocol_id = :protocol_id and "user" = :user;
-            """)
+            """
+            )
             res = await db.execute(sql, {"protocol_id": protocol_id, "user": wallet_id})
             return res.scalar_one_or_none()
 
@@ -71,10 +73,12 @@ class DashboardDBConnectorAsync(DBConnectorAsync):
             float | None: User deposit if found, otherwise None.
         """
         async with self.session() as db:
-            sql = text("""
+            sql = text(
+                """
                 SELECT deposit FROM loan_state
                 WHERE protocol_id = :protocol_id and "user" = :user;
-            """)
+            """
+            )
             res = await db.execute(sql, {"protocol_id": protocol_id, "user": wallet_id})
             return res.scalar_one_or_none()
 
@@ -92,10 +96,12 @@ class DashboardDBConnectorAsync(DBConnectorAsync):
             float | None: User collateral if found, otherwise None.
         """
         async with self.session() as db:
-            sql = text("""
+            sql = text(
+                """
                 SELECT collateral FROM loan_state
                 WHERE protocol_id = %s and "user" = %s;
-            """)
+            """
+            )
             res = await db.execute(sql, {"protocol_id": protocol_id, "user": wallet_id})
             return res.scalar_one_or_none()
 
@@ -111,10 +117,12 @@ class DashboardDBConnectorAsync(DBConnectorAsync):
             dict | None: User's loan state if found, otherwise None.
         """
         async with self.session() as db:
-            sql = text("""
+            sql = text(
+                """
                 SELECT collateral, debt, deposit FROM loan_state
                 WHERE protocol_id = %s and "user" = %s;
-            """)
+            """
+            )
             res = (
                 await db.execute(sql, {"protocol_id": protocol_id, "user": wallet_id})
             ).one()

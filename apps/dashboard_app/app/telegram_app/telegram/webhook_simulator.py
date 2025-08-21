@@ -3,6 +3,7 @@ import time
 import requests
 import logging
 from dotenv import load_dotenv
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -18,8 +19,7 @@ timeout = 1
 offset = 0
 
 
-
-def get_updates():   
+def get_updates():
     global offset
     updates = f"&allowed_updates={','.join(allowed_updates)}" if allowed_updates else ""
     url = f"{API_URL}/getUpdates?offset={offset}{updates}"
@@ -29,11 +29,10 @@ def get_updates():
 
     if data["ok"]:
         for update in data["result"]:
-            print("#Update ID", update["update_id"])
             offset = update["update_id"] + 1
 
             attempts = 5
-            while attempts > 0:              
+            while attempts > 0:
                 result = requests.post(
                     webhook_endpoint,
                     headers={

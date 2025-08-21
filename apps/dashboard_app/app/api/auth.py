@@ -5,7 +5,7 @@ import hmac
 import time
 
 from dashboard_app.app.telegram_app.telegram.config import (
-    ENV,   
+    ENV,
     TELEGRAM_TOKEN,
 )
 from dashboard_app.app.telegram_app.telegram.crud import (

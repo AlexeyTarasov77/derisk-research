@@ -7,6 +7,7 @@ import pytest
 import pandas as pd
 
 pytest.importorskip("shared")
+from apps.shared.protocol_ids import ProtocolIDs
 from helpers.loans_table import (
     get_protocol,
     get_loans_table_data,
@@ -70,8 +71,8 @@ class MockState(State):
     "state, expected",
     [
         (MockState("zkLend"), "zkLend"),
-        (MockState("Nostra Alpha"), "Nostra Alpha"),
-        (MockState("Nostra Mainnet"), "Nostra Mainnet"),
+        (MockState(ProtocolIDs.NOSTRA_ALPHA.value), ProtocolIDs.NOSTRA_ALPHA.value),
+        (MockState(ProtocolIDs.NOSTRA_MAINNET.value), ProtocolIDs.NOSTRA_MAINNET.value),
     ],
 )
 def test_get_protocol(state, expected):

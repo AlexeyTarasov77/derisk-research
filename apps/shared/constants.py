@@ -13,8 +13,8 @@ from shared.protocol_ids import ProtocolIDs
 CRONTAB_TIME = os.environ.get("CRONTAB_TIME", "1")
 
 ZKLEND = "zkLend"
-NOSTRA_ALPHA = "Nostra Alpha"
-NOSTRA_MAINNET = "Nostra Mainnet"
+NOSTRA_ALPHA = ProtocolIDs.NOSTRA_ALPHA.value
+NOSTRA_MAINNET = ProtocolIDs.NOSTRA_MAINNET.value
 NULL_CHAR = "\x00"
 GS_BUCKET_NAME = "derisk-persistent-state/v3"
 
