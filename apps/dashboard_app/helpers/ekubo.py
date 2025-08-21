@@ -8,7 +8,6 @@ import time
 
 import pandas
 import requests
-from requests.exceptions import ConnectionError
 
 
 class EkuboLiquidity:
@@ -111,7 +110,7 @@ class EkuboLiquidity:
         while attempt < max_retries:
             try:
                 response = requests.get(self.URL, params=params)
-            except ConnectionError as e:
+            except requests.exceptions.ConnectionError as e:
                 logging.warning("Unable to reach ekubo api url: %s", e)
                 return None
 

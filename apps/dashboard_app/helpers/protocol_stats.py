@@ -39,8 +39,9 @@ def get_general_stats(
         number_of_active_borrowers = (
             state.compute_number_of_active_loan_entities_with_debt()
         )
-        if  loan_stats[protocol].empty: continue
-      
+        if loan_stats[protocol].empty:
+            continue
+
         data.append(
             {
                 "Protocol": protocol,
@@ -148,7 +149,6 @@ def get_collateral_stats(
     underlying_addresses_to_decimals = {
         x.address: int(math.log10(x.decimal_factor)) for x in TOKEN_SETTINGS.values()
     }
-   
 
     # TODO cache prices for all
     prices = get_prices(token_decimals=underlying_addresses_to_decimals)
@@ -171,7 +171,6 @@ def get_collateral_stats(
                 )
             else:
                 raise ValueError
-            
 
             for token_address in token_addresses:
                 try:
@@ -194,8 +193,10 @@ def get_collateral_stats(
             data.append(
                 {
                     "Protocol": protocol,
-                    "token":token,
-                    "amount_usd":prices.get(TOKEN_SETTINGS[token].address, 0),#TODO ?
+                    "token": token,
+                    "amount_usd": prices.get(
+                        TOKEN_SETTINGS[token].address, 0
+                    ),  # TODO ?
                     "ETH collateral": token_collaterals["ETH"],
                     "wBTC collateral": token_collaterals["wBTC"],
                     "USDC collateral": token_collaterals["USDC"],
@@ -250,7 +251,7 @@ def get_debt_stats(
                             float(loan_entity.debt.get(token_address, 0.0))
                             for loan_entity in state.loan_entities.values()
                         )
-                        / float(TOKEN_SETTINGS[token].decimal_factor) 
+                        / float(TOKEN_SETTINGS[token].decimal_factor)
                         * float(state.interest_rate_models.debt.get(token_address, 1.0))
                     )
                     token_debts[token] = round(debt, 4)
@@ -258,12 +259,13 @@ def get_debt_stats(
                     # FIXME Remove when all tokens are added
                     token_debts[token] = Decimal(0.0)
 
-        
             data.append(
                 {
                     "Protocol": protocol,
-                    "token":token,
-                    "amount_usd":prices.get(TOKEN_SETTINGS[token].address, 0),#TODO ?
+                    "token": token,
+                    "amount_usd": prices.get(
+                        TOKEN_SETTINGS[token].address, 0
+                    ),  # TODO ?
                     "ETH debt": token_debts["ETH"],
                     "WBTC debt": token_debts["WBTC"],
                     "USDC debt": token_debts["USDC"],
@@ -292,7 +294,8 @@ def get_utilization_stats(
     :return: DataFrame with utilization stats
     """
 
-    general_stats.columns = general_stats.columns.str.lower()
+    if not general_stats.empty:
+        general_stats.columns = general_stats.columns.str.lower()
     supply_stats.columns = supply_stats.columns.str.lower()
     debt_stats.columns = debt_stats.columns.str.lower()
 

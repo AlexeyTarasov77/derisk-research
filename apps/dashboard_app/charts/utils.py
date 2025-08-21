@@ -69,10 +69,11 @@ def process_liquidity(
         collateral_token=collateral_token_underlying_address,
         debt_token=debt_token_underlying_address,
     )
-
-    main_chart_data = ekubo_liquidity.apply_liquidity_to_dataframe(
-        ekubo_liquidity.fetch_liquidity(),
-    )
+    liquidity = ekubo_liquidity.fetch_liquidity()
+    if liquidity is not None:
+        main_chart_data = ekubo_liquidity.apply_liquidity_to_dataframe(
+            liquidity,
+        )
 
     return main_chart_data, collateral_token_price
 
@@ -419,10 +420,8 @@ def get_data(state: State) -> tuple[dict[str, pd.DataFrame], pd.DataFrame]:
     t_swap = time.time()
     swap_amm = SwapAmm()
     swap_amm.__init__()
-    pool_cache = json.loads(
-        redis_client.get("pool_balances")
-    )
-   
+    pool_cache = json.loads(redis_client.get("pool_balances"))
+
     asyncio.run(swap_amm.get_balance_from_cache(pool_cache))
     logging.info(f"swap in {time.time() - t_swap}s")
     for pair in PAIRS:
@@ -461,7 +460,7 @@ def get_protocol_data_mappings(
 
     protocol_main_chart_data: dict[str, pd.DataFrame] = {}
     protocol_loans_data: dict[str, dict] = {}
-    main_chart_data, loans_data = get_data(state=state)  
+    main_chart_data, loans_data = get_data(state=state)
     for protocol_name in protocols:
         protocol_loans_data[protocol_name] = loans_data
         if current_pair == stable_coin_pair:
@@ -484,7 +483,6 @@ def transform_loans_data(
     :return: Transformed loans DataFrame.
     """
     loans_data = pd.DataFrame()
-
     for protocol in protocols:
         protocol_loans_data = protocol_loans_data_mapping[protocol]
         if loans_data.empty:

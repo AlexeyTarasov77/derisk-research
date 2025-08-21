@@ -21,6 +21,7 @@ from dashboard_app.helpers.protocol_stats import (
     get_utilization_stats,
 )
 from dashboard_app.helpers.tools import add_leading_zeros, get_prices
+from shared.state.zklend import Prices
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +38,7 @@ class DashboardDataHandler:
         self.data_connector = DataConnectorAsync()
         self.underlying_addresses_to_decimals = defaultdict(dict)
         self.zklend_state = None
-        self.prices = None
+        self.prices: Prices | None = None
         self.states = []
 
     @classmethod
@@ -138,7 +139,9 @@ class DashboardDataHandler:
         Set the prices of the underlying tokens.
         """
         logger.info("Setting prices.")
-        self.prices = get_prices(token_decimals=self.underlying_addresses_to_decimals)
+        self.prices = Prices(
+            **get_prices(token_decimals=self.underlying_addresses_to_decimals)
+        )
         logger.info("Prices set.")
 
     def _collect_token_parameters(self):
@@ -192,6 +195,7 @@ class DashboardDataHandler:
         :return: dict
         """
         logger.info("Getting supply stats.")
+        assert self.prices is not None
         supply_stats = get_supply_stats(
             states=self.states,
             prices=self.prices,

@@ -4,12 +4,15 @@ This module defines the Dashboard class for rendering a DeRisk dashboard using S
 
 import time
 import numpy as np
+import asyncio
 import pandas as pd
 import plotly
 import streamlit as st
 import matplotlib.pyplot as plt
 import seaborn as sns
+from app.services.fetch_data import get_history_by_wallet_id
 from shared.state import State
+import plotly.express
 from shared.helpers import (
     add_leading_zeros,
     extract_token_addresses,
@@ -23,6 +26,7 @@ from dashboard_app.helpers.settings import (
     STABLECOIN_BUNDLE_NAME,
     TOKEN_SETTINGS,
 )
+from dashboard_app.app.crud.base import db_connector
 
 
 from dashboard_app.charts.constants import ChartsHeaders, CommonValues
@@ -42,6 +46,7 @@ from dashboard_app.charts.utils import (
 )
 
 import logging
+
 logger = logging.getLogger(__name__)
 
 
@@ -141,9 +146,10 @@ class Dashboard:
         ) = self._get_protocol_data_mappings()
         logger.info(f"#TIME load_main_chart #B {time.time() - t}")
         t = time.time()
-        loans_data = (  # TODO: remove unused `loans_data` variable or use it
-            transform_loans_data(protocol_loans_data_mapping, self.PROTOCOL_NAMES)
-        )
+        # TODO: remove unused `loans_data` variable or use it
+        # loans_data = (
+        #     transform_loans_data(protocol_loans_data_mapping, self.PROTOCOL_NAMES)
+        # )
         logger.info(f"#TIME load_main_chart #C {time.time() - t}")
         t = time.time()
         main_chart_data = transform_main_chart_data(
@@ -159,6 +165,7 @@ class Dashboard:
         t = time.time()
 
         if self.current_pair == self.stable_coin_pair:
+            logger.info("Current pair if stable coin")
             for stable_coin in DEBT_TOKENS[:-1]:
                 debt_token = stable_coin
                 main_chart_data, collateral_token_price = process_liquidity(
@@ -170,6 +177,12 @@ class Dashboard:
             )
 
         logger.info(f"#TIME load_main_chart #F {time.time() - t}")
+        logger.info(
+            "Chart figure args: main_chart_data=%s, collateral_token=%s, collateral_token_price=%s",
+            main_chart_data,
+            collateral_token,
+            collateral_token_price,
+        )
         t = time.time()
         figure = get_main_chart_figure(
             data=main_chart_data,
@@ -450,23 +463,22 @@ class Dashboard:
                     figure = self._plot_chart(token, "supply")
                     st.plotly_chart(figure, True)
 
-    def get_user_history(self, wallet_id):
+    async def get_user_history(self, wallet_id: str):
         """
         Fetch and return the transaction history for a specific user.
         """
-        # TODO
-        if not wallet_id:
-            return None
-        
-        user_data = get_user_history(wallet_id)
-        if user_data is None or user_data.empty:
-            st.error("No data found for this user.")
-            return None
-
-        user_data.columns = [CommonValues.protocol.value, CommonValues.total_usd.value]
-        user_data = user_data.sort_values(CommonValues.total_usd.value, ascending=False)
-        user_data.reset_index(drop=True, inplace=True)
-
+        filtered_trade_open, filtered_trade_close = await get_history_by_wallet_id(
+            wallet_id
+        )
+        user_data = filtered_trade_open + filtered_trade_close
+        # user_data = get_user_history(wallet_id)
+        # if user_data is None or user_data.empty:
+        #     st.error("No data found for this user.")
+        #     return None
+        #
+        # user_data.columns = [CommonValues.protocol.value, CommonValues.total_usd.value]
+        # user_data = user_data.sort_values(CommonValues.total_usd.value, ascending=False)
+        # user_data.reset_index(drop=True, inplace=True)
         st.dataframe(user_data)
         return user_data
 
@@ -476,12 +488,12 @@ class Dashboard:
         """
         Display a leaderboard of the top 5 biggest collateral and debt per token.
         """
-        pd.set_option('display.max_columns', None)
+        pd.set_option("display.max_columns", None)
         logger.info(f"#LEAD H {self.collateral_stats.head(5)}")
         logger.info(f"#LEAD I {self.collateral_stats.info()}")
         logger.info(f"#LEAD X {self.debt_stats.head(5)}")
         logger.info(f"#LEAD Y {self.debt_stats.info()}")
-        
+
         st.header("Leaderboard: Top 5 Collateral & Debt per Token")
 
         if self.collateral_stats.empty or self.debt_stats.empty:
@@ -554,6 +566,12 @@ class Dashboard:
         """
         This function executes/runs all chart loading methods.
         """
+        # TODO: temp. Use real wallet
+        asyncio.run(
+            self.get_user_history(
+                "0x04d0390b777b424e43839cd1e744799f3de6c176c7e32c1812a41dbd9c19db6a"
+            )
+        )
         # Load sidebar with protocol settings
         t = time.time()
         self.load_sidebar()
@@ -580,8 +598,6 @@ class Dashboard:
         logger.info(f"#TIME load_comparison_lending_protocols_chart {time.time() - t}")
         t = time.time()
 
-        # TODO temp. Use real wallet
-        # self.get_user_history("0x04d0390b777b424e43839cd1e744799f3de6c176c7e32c1812a41dbd9c19db6a")
         logger.info(f"#TIME get_user_history {time.time() - t}")
         t = time.time()
 
